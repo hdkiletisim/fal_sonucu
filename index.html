@@ -255,7 +255,8 @@
       document.title = tur + ' | Falcı Gacı';
     }
     if (yorum) {
-      yorumEl.textContent = decodeURIComponent(yorum);
+      // URLSearchParams.get() değerleri zaten çözdüğü için yeniden decode etmiyoruz.
+      yorumEl.textContent = yorum;
     } else {
       yorumEl.className = 'loading';
     }
