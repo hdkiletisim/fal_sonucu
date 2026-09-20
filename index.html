@@ -242,24 +242,63 @@
     </footer>
  </main>
 
+ <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeglLngbABLzBI7L3fhCKed_N-JJh6GJM",
+      authDomain: "falci-gaci-8910a.firebaseapp.com",
+      projectId: "falci-gaci-8910a",
+      storageBucket: "falci-gaci-8910a.firebasestorage.app",
+      messagingSenderId: "649071070187",
+      appId: "1:649071070187:web:aa9c2acf20e4286f6e67ae",
+      measurementId: "G-3M6PXVN8NR"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const params = new URLSearchParams(window.location.search);
     const isim = params.get('isim');
+    const id = params.get('id');
     const tur = params.get('tur');
     const yorum = params.get('yorum');
     const yorumEl = document.getElementById('yorum');
     const turEl = document.getElementById('tur');
 
-    if (tur) {
-      turEl.textContent = tur;
-      document.title = tur + ' | Falcı Gacı';
+    function sonucuGoster(gosterilecekTur, gosterilecekYorum) {
+      if (gosterilecekTur) {
+        turEl.textContent = gosterilecekTur;
+        document.title = gosterilecekTur + ' | Falcı Gacı';
+      }
+      if (gosterilecekYorum) {
+        yorumEl.textContent = gosterilecekYorum;
+      } else {
+        yorumEl.className = 'loading';
+      }
     }
-    if (yorum) {
-      // URLSearchParams.get() değerleri zaten çözdüğü için yeniden decode etmiyoruz.
-      yorumEl.textContent = yorum;
-    } else {
-      yorumEl.className = 'loading';
+
+    async function sonucuYukle() {
+      if (id) {
+        try {
+          const belge = await db.collection('shared_fortunes').doc(id).get();
+          if (!belge.exists) {
+            yorumEl.textContent = 'Bu fal sonucu bulunamadı veya artık mevcut değil.';
+            return;
+          }
+          const veri = belge.data();
+          sonucuGoster(veri.tur, veri.yorum);
+          return;
+        } catch (hata) {
+          yorumEl.textContent = 'Fal sonucu yüklenemedi. Lütfen bağlantınızı kontrol edin.';
+          return;
+        }
+      }
+
+      // Eski uzun bağlantılar geriye dönük olarak çalışmaya devam eder.
+      sonucuGoster(tur, yorum);
     }
+
+    sonucuYukle();
 
     function sayfayiPaylas() {
       const url = window.location.href;
